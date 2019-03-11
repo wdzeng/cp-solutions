@@ -8,25 +8,25 @@ using namespace nmcryutil;
 using namespace nmsboxes;
 
 // Performs a single permutation of data.
-void encrypt(int* left, int* right, lung key);
+void encrypt(uui* left, uui* right, lung key);
 
 // Performs 16 permutation processes to data and a reverse. Then applys the
 // final permutation. Returns the permutated 64-bit value.
 lung encrypt(lung ip, lung keys[], bool reverse = false);
 
 // Query the value in s boxes.
-int squery(lung e);
+uui squery(lung e);
 
 // A permutation about DES.
-int f(int key32, lung key48);
+uui f(uui key32, lung key48);
 
 // Concantates two 32-bit keys to a 64-bit key.
-lung concat3264(int left, int right) { return (lung)left << 32 | right; }
+lung concat3264(uui left, uui right) { return (lung)left << 32 | right; }
 
 // Split a 64-bit key into two 32-bit keys.
-void split6432(lung seq, int* left, int* right) {
+void split6432(lung seq, uui* left, uui* right) {
     *left = seq >> 32;
-    *right = seq & 0xFFFFFFFF;
+    *right = seq & 0xFFFFFFFFul;
 }
 
 // Performs the inital permutation.
@@ -49,11 +49,9 @@ lung genFp(lung msg) {
     return shuffle(msg, 64, TABLE_FINAL_PERMUTATION, 64, false, false);
 }
 
-/***************************************************************************/
-
 // Switches the ip-converted msg for 16 times.
 lung encrypt(lung ip, lung keys[], bool reverse) {
-    int left, right;
+    uui left, right;
     split6432(ip, &left, &right);
     // Encoding
     if (!reverse) {
@@ -67,21 +65,21 @@ lung encrypt(lung ip, lung keys[], bool reverse) {
     return concat3264(right, left);
 }
 
-void encrypt(int* left, int* right, lung key) {
-    int right0 = *right;
+void encrypt(uui* left, uui* right, lung key) {
+    uui right0 = *right;
     *right = *left ^ f(*right, key);
     *left = right0;
 }
 
-int squery(lung e) {
-    int key6;
-    int sb[8];
+uui squery(lung e) {
+    uui key6;
+    uui sb[8];
     for (int i = 7; i >= 0; i--) {
-        key6 = e & 0b111111;
+        key6 = e & 0b111111u;
         sb[i] = s(i + 1, key6);  // index 0 matches the box 1
         e >>= 6;
     }
-    int res = 0;
+    uui res = 0;
     for (int i = 0; i < 8; i++) {
         res |= sb[i];
         if (i < 7) res <<= 4;
@@ -89,7 +87,7 @@ int squery(lung e) {
     return res;
 }
 
-int f(int key32, lung key48) {
+uui f(uui key32, lung key48) {
     static int TABLE_E_BIT_SELECTION[] = {
         32, 1,  2,  3,  4,  5,  4,  5,  6,  7,  8,  9,  8,  9,  10, 11,
         12, 13, 12, 13, 14, 15, 16, 17, 16, 17, 18, 19, 20, 21, 20, 21,
@@ -99,8 +97,8 @@ int f(int key32, lung key48) {
                             3,  9, 19, 13, 30, 6,  22, 11, 4,  25};
 
     lung e = shuffle(key32, 32, TABLE_E_BIT_SELECTION, 48, false, false);
-    int spmt = squery(e ^ key48);
-    return (int)shuffle(spmt, 32, TABLE_P, 32, false, false);
+    uui spmt = squery(e ^ key48);
+    return shuffle(spmt, 32, TABLE_P, 32, false, false);
 }
 
 }  // namespace nmdblock

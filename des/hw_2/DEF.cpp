@@ -1,38 +1,30 @@
 typedef unsigned long lung;
+typedef unsigned int uui;
 
 namespace nmcryutil {
-
-// Converts 0-h to integer.
-int toInt(char c);
 
 // Gets the bit at a specific position. Returns either 0 or 1. If right is set
 // to true, the index is count from right to left. That is, the 63th bit matches
 // index=0. If zero is set to first, the first index is 0 or otherwise 1.
-int bitAt(lung val, int index, bool right = 1, bool zero = 1);
+int bitAt(lung val, int index, bool right = true, bool zero = true);
 
 // Gets the bit at a specific position. Returns either 0 or 1. If right is set
 // to true, the index is count from right to left. That is, the 31th bit matches
 // index=0. If zero is set to first, the first index is 0 or otherwise 1.
-int bitAt(int val, int index, bool right = 1, bool zero = 1);
+int bitAt(uui val, int index, bool right = true, bool zero = true);
 
 // Sets and returns the bit at a specific position. If right is set to true, the
 // index is count from right to left. That is, the 63th bit matches index=0. If
 // zero is set to first, the first index is 0 or otherwise 1.
-lung bit(lung src, int index, int val, bool right = 1, bool zero = 1);
+lung bit(lung src, int index, int val, bool right = true, bool zero = true);
 
 // Sets and returns the bit at a specific position. If right is set to true, the
 // index is count from right to left. That is, the 31th bit matches index=0. If
 // zero is set to first, the first index is 0 or otherwise 1.
-int bit(int src, int index, int val, bool right = 1, bool zero = 1);
+int bit(uui src, int index, int val, bool right = true, bool zero = true);
 
 // Permutation by a table.
 lung shuffle(lung src, int table[], int len);
-
-int toInt(char c) {
-    if (c >= 'a') return 10 + c - 'a';
-    if (c >= 'A') return 10 + c - 'A';
-    return c - '0';
-}
 
 int bitAt(lung val, int index, bool right, bool zero) {
     if (!zero) {
@@ -41,10 +33,10 @@ int bitAt(lung val, int index, bool right, bool zero) {
     if (!right) {
         index = 63 - index;
     }
-    return (val >> index) & 1;
+    return (val >> index) & 1l;
 }
 
-int bitAt(int val, int index, bool right, bool zero) {
+int bitAt(uui val, int index, bool right, bool zero) {
     if (!zero) {
         index--;
     }
@@ -63,15 +55,15 @@ lung bit(lung src, int index, int val, bool right, bool zero) {
     }
     // set to 1
     if (val) {
-        return src | (1ul << index);
+        return src | (1l << index);
     }
     // set to 0
     else {
-        return src & ~(1ul << index);
+        return src & ~(1l << index);
     }
 }
 
-int bit(int src, int index, int val, bool right, bool zero) {
+int bit(uui src, int index, int val, bool right, bool zero) {
     if (!zero) {
         index--;
     }
@@ -144,7 +136,7 @@ int s(int index, int row, int col) {
 }
 
 // Gets the value in s boxes by a given 6-bit key.
-int s(int index, int key6) {
+int s(int index, uui key6) {
     int row = (key6 & 0b100000) >> 4 | (key6 & 1);
     int col = (key6 & 0b011110) >> 1;
     return s(index, row, col);
@@ -163,43 +155,44 @@ lung genKey56(lung key64) {
         10, 2,  59, 51, 43, 35, 27, 19, 11, 3,  60, 52, 44, 36,
         63, 55, 47, 39, 31, 23, 15, 7,  62, 54, 46, 38, 30, 22,
         14, 6,  61, 53, 45, 37, 29, 21, 13, 5,  28, 20, 12, 4};
-
-    lung key56 = 0;
-    for (int i = 0; i < 56; i++) {
-        key56 = (key56 | bitAt(key64, TABLE_PERMUTED_CHOICE_1[i], false, false))
-                << 1;
-    }
-    return key56 >> 1;  // Move back
+    return shuffle(key64, 64, TABLE_PERMUTED_CHOICE_1, 56, false, false);
 }
 
 // Permutate a key by shift one or two position to left. The leftest bit is
 // cycled to right.
-int pmtKey28(int key28, int n) {
-    for (int i = 0; i < n; i++) {
-        key28 <<= 1;
-        key28 |= bitAt(key28, 28);
-        key28 &= 0x0FFFFFFF;
+uui pmtKey28(uui key28, bool one = true) {
+    if (one) {
+        uui b = key28 >> 27;
+        key28 = (key28 << 1) | b;
     }
-    return key28;
+    // Shift by two
+    else {
+        uui b2 = key28 >> 26;
+        key28 = (key28 << 2) | b2;
+    }
+    return key28 & 0x0FFFFFFF;
 }
 
 // Permuate a 28-but key to another 16 keys.
-void pmtKey28(int key28, int dest[]) {
-    static int SHIFT_SCHD[] = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
+void pmtKey28(uui key28, uui dest[]) {
+    static bool SHIFT_SCHD[] = {true,  true,  false, false, false, false,
+                               false, false, true,  false, false, false,
+                               false, false, false, true};
 
-    int src, shift, k;
+    uui src;
+    bool one;
     for (int i = 0; i < 16; i++) {
         src = i ? dest[i - 1] : key28;
-        shift = SHIFT_SCHD[i];
-        dest[i] = pmtKey28(src, shift);
+        one = SHIFT_SCHD[i];
+        dest[i] = pmtKey28(src, one);
     }
 }
 
 // Permutate a 56-bit key to 16 C-Keys and 16 D-Keys. Each of C/D-Key is
 // 28-bit so the first 4 bits is filled with '0'.
-void pmtKey56(lung key56, int c[], int d[]) {
-    int dkey = key56 & 0x0FFFFFFF;
-    int ckey = key56 >> 28;
+void pmtKey56(lung key56, uui c[], uui d[]) {
+    uui dkey = key56 & 0x0FFFFFFFul;
+    uui ckey = key56 >> 28;
     pmtKey28(ckey, c);
     pmtKey28(dkey, d);
 }
@@ -212,11 +205,12 @@ void genKey48s(lung key56, lung key48[]) {
         26, 8,  16, 7,  27, 20, 13, 2,  41, 52, 31, 37, 47, 55, 30, 40,
         51, 45, 33, 48, 44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32};
 
-    int c[16], d[16];
+    uui c[16], d[16];
     pmtKey56(key56, c, d);
     lung cd;
     for (int n = 0; n < 16; n++) {
-        cd = ((lung)c[n] << 28) | d[n];
+        cd = c[n];
+        cd = (cd << 28) | d[n];
         key48[n] = shuffle(cd, 56, TABLE_PERMUTED_CHOICE_2, 48, false, false);
     }
 }
@@ -229,25 +223,25 @@ using namespace nmcryutil;
 using namespace nmsboxes;
 
 // Performs a single permutation of data.
-void encrypt(int* left, int* right, lung key);
+void encrypt(uui* left, uui* right, lung key);
 
 // Performs 16 permutation processes to data and a reverse. Then applys the
 // final permutation. Returns the permutated 64-bit value.
 lung encrypt(lung ip, lung keys[], bool reverse = false);
 
 // Query the value in s boxes.
-int squery(lung e);
+uui squery(lung e);
 
 // A permutation about DES.
-int f(int key32, lung key48);
+uui f(uui key32, lung key48);
 
 // Concantates two 32-bit keys to a 64-bit key.
-lung concat3264(int left, int right) { return (lung)left << 32 | right; }
+lung concat3264(uui left, uui right) { return (lung)left << 32 | right; }
 
 // Split a 64-bit key into two 32-bit keys.
-void split6432(lung seq, int* left, int* right) {
+void split6432(lung seq, uui* left, uui* right) {
     *left = seq >> 32;
-    *right = seq & 0xFFFFFFFF;
+    *right = seq & 0xFFFFFFFFul;
 }
 
 // Performs the inital permutation.
@@ -272,7 +266,7 @@ lung genFp(lung msg) {
 
 // Switches the ip-converted msg for 16 times.
 lung encrypt(lung ip, lung keys[], bool reverse) {
-    int left, right;
+    uui left, right;
     split6432(ip, &left, &right);
     // Encoding
     if (!reverse) {
@@ -286,21 +280,21 @@ lung encrypt(lung ip, lung keys[], bool reverse) {
     return concat3264(right, left);
 }
 
-void encrypt(int* left, int* right, lung key) {
-    int right0 = *right;
+void encrypt(uui* left, uui* right, lung key) {
+    uui right0 = *right;
     *right = *left ^ f(*right, key);
     *left = right0;
 }
 
-int squery(lung e) {
-    int key6;
-    int sb[8];
+uui squery(lung e) {
+    uui key6;
+    uui sb[8];
     for (int i = 7; i >= 0; i--) {
-        key6 = e & 0b111111;
+        key6 = e & 0b111111u;
         sb[i] = s(i + 1, key6);  // index 0 matches the box 1
         e >>= 6;
     }
-    int res = 0;
+    uui res = 0;
     for (int i = 0; i < 8; i++) {
         res |= sb[i];
         if (i < 7) res <<= 4;
@@ -308,7 +302,7 @@ int squery(lung e) {
     return res;
 }
 
-int f(int key32, lung key48) {
+uui f(uui key32, lung key48) {
     static int TABLE_E_BIT_SELECTION[] = {
         32, 1,  2,  3,  4,  5,  4,  5,  6,  7,  8,  9,  8,  9,  10, 11,
         12, 13, 12, 13, 14, 15, 16, 17, 16, 17, 18, 19, 20, 21, 20, 21,
@@ -318,8 +312,8 @@ int f(int key32, lung key48) {
                             3,  9, 19, 13, 30, 6,  22, 11, 4,  25};
 
     lung e = shuffle(key32, 32, TABLE_E_BIT_SELECTION, 48, false, false);
-    int spmt = squery(e ^ key48);
-    return (int)shuffle(spmt, 32, TABLE_P, 32, false, false);
+    uui spmt = squery(e ^ key48);
+    return shuffle(spmt, 32, TABLE_P, 32, false, false);
 }
 
 }  // namespace nmdblock
@@ -366,41 +360,43 @@ using namespace std;
 using namespace nmcryutil;
 
 int main() {
-    lung plaintexts[] = {0xbe480047cce655dbul, 0x453b067193a45dd6ul,
-                         0x6d5b8932b745264eul, 0x89ef992ca9f3dbbful,
-                         0x7f466ddd525c32c7ul, 0x95b330236137670dul,
-                         0x6ea9f9e827f8a414ul, 0x3310a8cac239c4e8ul,
-                         0x0f4bdbf17d4975f5ul, 0xe1a02d8b76738deeul};
-    lung ekeys[] = {0xda3014b0715059e6ul, 0xc991fcb1c2ca8d56ul,
-                    0xe5e2adf3e3accebdul, 0x557e28cf53b12a71ul,
-                    0xbf36fa881cd554d8ul, 0xfc8bcee076acd78aul,
-                    0x2f41770c4841039cul, 0x18c09faaefd5fb85ul,
-                    0xaadd02913d90abd5ul, 0xdad35f07c350f584ul};
-    lung ciphertexts[] = {0xc71b0946f8308fa5ul, 0x1e8951c1253c2837l,
-                          0x9b18bbfc748fa55eul, 0xf4ef880bbbd5fa36ul,
-                          0xa647883ddb55a783ul, 0x71045a9a2381da5dul,
-                          0x07f437adf583e839ul, 0xffa08459aabce49dul,
-                          0x0ff2ef31b23c32fful, 0x7a08ea6100b83807ul};
-    lung dkeys[] = {0x37ca5f03bbdb5668ul, 0x1ad9299839efc771ul,
-                    0x79e6db8d6c4f725ful, 0xe45d6ef5999a2329ul,
-                    0xd0d1226520263b9ful, 0x0cfb7d18bf8f4cf3ul,
-                    0xcbbffe5f7bdc33cful, 0xadbef68debd8b7a6ul,
-                    0xb918355be8203c81ul, 0x769b1ab38193c72cul};
+    lung ekeys[] = {0xda3014b0715059e6ul, 0x453b067193a45dd6ul,
+                    0x6d5b8932b745264eul, 0x89ef992ca9f3dbbful,
+                    0x7f466ddd525c32c7ul, 0x95b330236137670dul,
+                    0x6ea9f9e827f8a414ul, 0x3310a8cac239c4e8ul,
+                    0x0f4bdbf17d4975f5ul, 0xe1a02d8b76738deeul};
+    lung plaintexts[] = {0xbe480047cce655dbul, 0xc991fcb1c2ca8d56ul,
+                         0xe5e2adf3e3accebdul, 0x557e28cf53b12a71ul,
+                         0xbf36fa881cd554d8ul, 0xfc8bcee076acd78aul,
+                         0x2f41770c4841039cul, 0x18c09faaefd5fb85ul,
+                         0xaadd02913d90abd5ul, 0xdad35f07c350f584ul};
+    lung dkeys[] = {0xc71b0946f8308fa5ul, 0x1e8951c1253c2837ul,
+                    0x9b18bbfc748fa55eul, 0xf4ef880bbbd5fa36ul,
+                    0xa647883ddb55a783ul, 0x71045a9a2381da5dul,
+                    0x07f437adf583e839ul, 0xffa08459aabce49dul,
+                    0x0ff2ef31b23c32fful, 0x7a08ea6100b83807ul};
+    lung ciphertexts[] = {0x37ca5f03bbdb5668ul, 0x1ad9299839efc771ul,
+                          0x79e6db8d6c4f725ful, 0xe45d6ef5999a2329ul,
+                          0xd0d1226520263b9ful, 0x0cfb7d18bf8f4cf3ul,
+                          0xcbbffe5f7bdc33cful, 0xadbef68debd8b7a6ul,
+                          0xb918355be8203c81ul, 0x769b1ab38193c72cul};
 
-    clock_t start, end;
-    double etime[10], dtime[10];
     lung res;
+    // Encrpytion
     for (int i = 0; i < 10; i++) {
         res = encode(plaintexts[i], ekeys[i]);
         printf("%016lX\n", res);
     }
+
+    // Decryption
     for (int i = 0; i < 10; i++) {
         res = decode(ciphertexts[i], dkeys[i]);
         printf("%016lX\n", res);
     }
 
-    start = clock();
+    // Measure time
+    clock_t start = clock();
     lung cmsg = encode(plaintexts[0], ekeys[0]);
-    end = clock();
+    clock_t end = clock();
     printf("%.3f", ((double)(end - start)) / CLOCKS_PER_SEC * 1000);
 }

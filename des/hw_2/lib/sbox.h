@@ -41,7 +41,7 @@ int s(int index, int row, int col) {
 }
 
 // Gets the value in s boxes by a given 6-bit key.
-int s(int index, int key6) {
+int s(int index, uui key6) {
     int row = (key6 & 0b100000) >> 4 | (key6 & 1);
     int col = (key6 & 0b011110) >> 1;
     return s(index, row, col);
