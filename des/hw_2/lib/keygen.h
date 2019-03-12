@@ -27,7 +27,7 @@ uui pmtKey28(uui key28, bool one = true) {
         uui b2 = key28 >> 26;
         key28 = (key28 << 2) | b2;
     }
-    return key28 & 0x0FFFFFFF;
+    return key28 & 0x0FFFFFFFu;
 }
 
 // Permuate a 28-but key to another 16 keys.
@@ -74,10 +74,10 @@ void genKey48s(lung key56, lung key48[]) {
 
 }  // namespace nmkeygen
 
-// Generates 16 subkeys by given 64-biy key. Each subkey is 48-bit prefixed
+// Generates 16 subkeys by given 64-bit key. Each subkey is 48-bit prefixed
 // with 8 zeros. The 64-bit key is first permutated to another 56-bit key, then
 // multuple tasks are processed to generate such subkeys.
-void createSubKeys(lung seed, lung keys[]) {
+void createSubkeys(lung seed, lung keys[]) {
     seed = nmkeygen::genKey56(seed);
     nmkeygen::genKey48s(seed, keys);
 }

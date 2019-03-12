@@ -1,6 +1,7 @@
 #ifndef hpblsboxes
 #define hpblsboxes
 
+#include "./util.h"
 namespace nmsboxes {
 
 // Gets the value in s boxes by box index, row and column. Note that the

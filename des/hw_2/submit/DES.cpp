@@ -321,7 +321,7 @@ uui f(uui key32, lung key48) {
 // Generates 16 subkeys by given 64-biy key. Each subkey is 48-bit prefixed
 // with 8 zeros. The 64-bit key is first permutated to another 56-bit key, then
 // multuple tasks are processed to generate such subkeys.
-void createSubKeys(lung seed, lung keys[]) {
+void createSubkeys(lung seed, lung keys[]) {
     seed = nmkeygen::genKey56(seed);
     nmkeygen::genKey48s(seed, keys);
 }
@@ -343,13 +343,13 @@ lung decode(lung msg, lung key48s[]) {
 // Encodes a 64-bit message
 lung encode(lung msg, lung key64) {
     lung subkeys[16];
-    createSubKeys(key64, subkeys);
+    createSubkeys(key64, subkeys);
     return encode(msg, subkeys);
 }
 
 lung decode(lung msg, lung key64) {
     lung subkeys[16];
-    createSubKeys(key64, subkeys);
+    createSubkeys(key64, subkeys);
     return decode(msg, subkeys);
 }
 
