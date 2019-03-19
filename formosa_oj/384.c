@@ -1,6 +1,7 @@
-#include <stdio.h>
+// AC
 
-int max(int a, int b) { return a > b ? a : b; }
+#include <stdio.h>
+#define  max(a, b) (a)>(b)?(a):(b)
 
 int main() {
     int n;
