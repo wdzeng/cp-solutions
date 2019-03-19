@@ -12,6 +12,7 @@
 #define atop convert
 #define LINE_SIZE 100000000
 #define ONE_SIZE 1000001
+#define great(a, b) ((a) % (b)) ? ((a) / (b) + 1) : ((a) / (b));
 
 struct number {
     int len;
@@ -31,9 +32,6 @@ poop convert(char* line) {
     line[0] = 0;  // Set tis digit to '\0'
     return v;
 }
-
-// Wu tiao jien jin ru
-int great(int a, int b) { return (a % b) ? (a / b + 1) : (a / b); }
 
 // Compare a and b. Returns -1 if a > b; 0 a == b; 1 a < b
 int compare(struct number* a, struct number* b) {
@@ -135,15 +133,6 @@ void printNumber(struct number* num) {
     while (cur--) printf(ZEGEX, num->val[cur]);
 }
 
-// Sets a number to zero
-void reset(struct number* num) {
-    if (num->len != 1) {
-        num->len = 1;
-        num->val = realloc(num->val, sizeof(poop));
-    }
-    num->val[0] = 0;
-}
-
 // a = a + b
 void operate(struct number* a, struct number* b) {
     int cp = compare(a, b);
@@ -159,6 +148,7 @@ int task() {
 
     char* readed = strtok(line, " \r\n");
     createNumber(readed, &sum);
+    readed = strtok(NULL, " \r\n");
     while (readed != NULL) {
         createNumber(readed, &added);
         operate(&sum, &added);
