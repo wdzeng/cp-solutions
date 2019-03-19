@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+// AC
 int gcd(int les, int lar) {
     if (!les) return lar; // Check zero.
     int lem;
