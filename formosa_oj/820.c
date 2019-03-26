@@ -69,7 +69,7 @@ void clear(struct number* num) {
 // Converts string to positive number
 void createNumber(char* string, struct number* dest) {
     int cursor = strlen(string);
-    const int alen = great(cursor, DIGIT);
+    const int alen = (cursor - 1) / DIGIT + 1;
     poop* array = (poop*)malloc(alen * sizeof(poop));
     int index = 0;
     while ((cursor -= DIGIT) > 0) {
@@ -245,7 +245,7 @@ int task() {
     hasnext = 1;
     nextplus = p[nread] == '+';
     p[nread] = 0;
-    //printf("Read: %s\n", p);
+    // printf("Read: %s\n", p);
     createNumber(p, &sum);
     while (hasnext) {
         prevplus = nextplus;
@@ -254,7 +254,7 @@ int task() {
         hasnext = p[nread];
         nextplus = p[nread] == '+';
         p[nread] = '\0';
-        //printf("Read: %s\n", p);
+        // printf("Read: %s\n", p);
         createNumber(p, &next);
         operate(&sum, &next, prevplus);
     }
