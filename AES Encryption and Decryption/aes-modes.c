@@ -139,15 +139,13 @@ int ecbEncrypt(const unsigned char* input, unsigned char* output,
 }
 
 int main() {
-    
-    const unsigned char strkey[] = "1234567890123456";
-    const unsigned char vector[] = "0000000000000000";
+    const unsigned char strkey[] = "RandomNumbers000";
+    const unsigned char vector[] = "9999999999999999";
     const int nbit = strlen((char*)strkey) * 8;
     unsigned char plntxt[] = "Hello World!";
     unsigned char output[BUF_SIZ];
-
     int outlen;
-
+    
     memset(output, 0, BUF_SIZ);
     outlen = ecbEncrypt(plntxt, output, strkey, false, nbit);
     viewString(output, outlen);
@@ -163,33 +161,6 @@ int main() {
     memset(output, 0, BUF_SIZ);
     outlen = cbcEncrypt(plntxt, output, strkey, vector, true, nbit);
     viewString(output, outlen);
-    
-    return 0;
-
-    /*
-    const unsigned char strkey[] = "123456789012345678901234";
-    const unsigned char vector[] = "0000000000000000";
-    unsigned char plntxt[] = "7AAD9ABF4564A77EAA506217C57E33E6";
-    unsigned char output[BUF_SIZ];
-    const int nbit = strlen(strkey) * 8;
-    const int len = hextostr(plntxt);
-
-    memset(output, 0, BUF_SIZ);
-    ecbDecrypt(plntxt, len, output, strkey, false, nbit);
-    printf("%s\n", output);
-
-    memset(output, 0, BUF_SIZ);
-    ecbDecrypt(plntxt, len, output, strkey, true, nbit);
-    printf("%s\n", output);
-
-    memset(output, 0, BUF_SIZ);
-    cbcDecrypt(plntxt, len, output, strkey, vector, false, nbit);
-    printf("%s\n", output);
-
-    memset(output, 0, BUF_SIZ);
-    cbcDecrypt(plntxt, len, output, strkey, vector, true, nbit);
-    printf("%s\n", output);
 
     return 0;
-    */
 }
