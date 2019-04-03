@@ -146,7 +146,7 @@ int main() {
     unsigned char output[BUF_SIZ];
     int outlen;
 
-    FILE* out = fopen("./Out.txt", "r");
+    FILE* out = fopen("./Out.txt", "w");
     if (out == NULL) {
         printf("Fail to write to the file.\n");
         exit(-1);
