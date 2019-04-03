@@ -31,11 +31,11 @@ void clearPkcs7(unsigned char* str) {
     str[slen - rem] = 0;
 }
 
-void viewString(unsigned char* s, int len) {
+void printHexaString(const unsigned char* s, int len, FILE* output) {
     for (int i = 0; i < len; i += 2) {
-        printf("%02x%02x ", s[i], s[i + 1]);
+        fprintf(output, "%02x%02x ", s[i], s[i + 1]);
     }
-    printf("\n");
+    fprintf(output, "\n");
 }
 
 void pkcs7(unsigned char* input) {
@@ -139,28 +139,36 @@ int ecbEncrypt(const unsigned char* input, unsigned char* output,
 }
 
 int main() {
-    const unsigned char strkey[] = "RandomNumbers000";
-    const unsigned char vector[] = "9999999999999999";
+    const unsigned char strkey[] = "1234567890123456";
+    const unsigned char vector[] = "0000000000000000";
     const int nbit = strlen((char*)strkey) * 8;
-    unsigned char plntxt[] = "Hello World!";
+    unsigned char plntxt[] = "AES is efficient in both software and hardware.";
     unsigned char output[BUF_SIZ];
     int outlen;
-    
+
+    FILE* out = fopen("./Out.txt", "r");
+    if (out == NULL) {
+        printf("Fail to write to the file.\n");
+        exit(-1);
+    }
+
     memset(output, 0, BUF_SIZ);
     outlen = ecbEncrypt(plntxt, output, strkey, false, nbit);
-    viewString(output, outlen);
+    printHexaString(output, outlen, out);
 
     memset(output, 0, BUF_SIZ);
     outlen = ecbEncrypt(plntxt, output, strkey, true, nbit);
-    viewString(output, outlen);
+    printHexaString(output, outlen, out);
 
     memset(output, 0, BUF_SIZ);
     outlen = cbcEncrypt(plntxt, output, strkey, vector, false, nbit);
-    viewString(output, outlen);
+    printHexaString(output, outlen, out);
 
     memset(output, 0, BUF_SIZ);
     outlen = cbcEncrypt(plntxt, output, strkey, vector, true, nbit);
-    viewString(output, outlen);
+    printHexaString(output, outlen, out);
 
+    fclose(out);
+    printf("Done.\n");
     return 0;
 }
