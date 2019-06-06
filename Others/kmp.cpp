@@ -2,6 +2,10 @@
 #include <iostream>
 using namespace std;
 
+int* fail(const char*);
+int kmp(const char*, const char*, int*);
+int kmp(const char*, const char*);
+
 int* fail(const char* pat) {
     int l = strlen(pat);
     int* f = new int[l];
@@ -35,34 +39,44 @@ int* fail(const char* pat) {
     return f;
 }
 
-int kmp(const char* str, const char* pat) {
-    int* f = fail(pat);
+int kmp(const char* str, const char* pat, int* f) {
     int i = 0;
     int j = 0;
     while (str[i]) {
         if (!pat[j]) {
             // Found!
-            delete[] f;
             return i - j;
         }
         if (str[i] == pat[j]) {
+            // Match! Go next.
             i++;
             j++;
             continue;
         }
+
+        // Unmatch. Use failure function.
+
         if (j == 0) {
             i++;
             continue;
         }
-        while (j > 0 && pat[j] != j) {
-            j = f[j - 1];
+
+        j--;
+        while (j > 0 && f[j] != j) {
+            j = f[j];
             if (str[i] == pat[j]) break;
         }
         if (str[i] == pat[j]) j++;
         i++;
     }
-    delete[] f;
     return pat[j] ? -1 : (i - j);
+}
+
+int kmp(const char* string, const char* pattern) {
+    int* f = fail(pattern);
+    int ret = kmp(string, pattern, f);
+    delete[] f;
+    return ret;
 }
 
 int main() {
