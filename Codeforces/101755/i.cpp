@@ -1,18 +1,24 @@
 #include <bits/stdc++.h>
 using namespace std;
 int n, h;
-int dist[1024][1024];
 int mom[1024];
 vector<int> lvs;
 
 int query(int x, int y) {
+    static int result[1024][1024];
+    static bool first = true;
+    if (first) {
+        first = false;
+        memset(result, -1, sizeof(result));
+    }
+
     if (x > y) swap(x, y);
     if (x == y) return 0;
-    if (dist[x][y] != -1) return dist[x][y];
+    if (result[x][y] != -1) return result[x][y];
     cout << "? " << x << " " << y << endl;
     int d;
     cin >> d;
-    return dist[x][y] = d;
+    return result[x][y] = d;
 }
 
 pair<int, int> find2leaves(vector<int>& cands, int dist) {
@@ -24,12 +30,12 @@ pair<int, int> find2leaves(vector<int>& cands, int dist) {
 }
 
 int build(vector<int>& cands, vector<int>& leafcands, int treeheight) {
-  /*   cout << "Nodes: ";
-    for (int x : cands) cout << x << " ";
-    cout << endl;
-    cout << "Leaves: ";
-    for (int x : leafcands) cout << x << " ";
-    cout << endl; */
+    /*   cout << "Nodes: ";
+      for (int x : cands) cout << x << " ";
+      cout << endl;
+      cout << "Leaves: ";
+      for (int x : leafcands) cout << x << " ";
+      cout << endl; */
 
     if (treeheight == 1) return cands[0];
     int rootdist = treeheight - 1;
@@ -68,7 +74,6 @@ int main() {
     srand(time(NULL));
     cin >> n;
     int h = round(log2(n + 1));
-    memset(dist, -1, sizeof(dist));
 
     vector<int> cands, none;
     for (int i = 1; i <= n; i++) cands.push_back(i);
