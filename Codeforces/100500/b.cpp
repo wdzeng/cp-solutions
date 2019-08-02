@@ -7,7 +7,7 @@ typedef vector<int> vi;
 #define iter(x) x.begin(), x.end()
 #define ms(x) memset(x, 0, sizeof(x))
 #define mn(x) memset(x, -1, sizeof(x))
-const int X = 2, MOD = 1e9 + 7;
+const int X = 1e6 + 99, MOD = 1e9 + 7;
 
 bool solve() {
     int n;
@@ -31,14 +31,14 @@ bool solve() {
     for (int i = 0; i < n; i++) {
         hs = (hs * X + sum) % MOD;
     }
-  //  cout << "* " << hs << endl;
+    //  cout << "* " << hs << endl;
 
     unordered_set<int> rec;
     ll h0 = 0;
     for (int i = 0; i < n; i++) {
         h0 = (h0 * X + arr[0][i]) % MOD;
     }
-   // cout << "h0: " << h0 << endl;
+    // cout << "h0: " << h0 << endl;
 
     vector<int> h1 = {0};
     for (int i = 0; i < 2 * n; i++) {
@@ -48,7 +48,7 @@ bool solve() {
     }
     for (int i = 0; i < n; i++) {
         ll h = (h0 + h1[i + n] - h1[i] * xx % MOD + MOD) % MOD;
- //       cout << h << endl;
+        //       cout << h << endl;
         rec.insert(h);
     }
 
@@ -58,8 +58,8 @@ bool solve() {
         h = (h * X + arr[2][i % n]) % MOD;
         h2tmp.push_back(h);
     }
-    for(int i = 0; i < n; i++) {
-        ll h = (h2tmp[i+n] - h2tmp[i] * xx % MOD) + MOD % MOD;
+    for (int i = 0; i < n; i++) {
+        ll h = (h2tmp[i + n] - h2tmp[i] * xx % MOD) + MOD % MOD;
         h2.push_back(h);
     }
 
@@ -72,7 +72,7 @@ bool solve() {
     for (int i = 0; i < n; i++) {
         ll h = (h3[i + n] - h3[i] * xx % MOD + MOD) % MOD;
         h = (hs - h + MOD) % MOD;
-        for(int v: h2) {
+        for (int v : h2) {
             if (rec.count((h - v + MOD) % MOD)) return true;
         }
     }
