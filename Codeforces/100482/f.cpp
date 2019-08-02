@@ -51,19 +51,19 @@ struct ma {
     }
     int canhitat(int r) {
         r++;
-        return ht[r/2 - 1];
+        return ht[r / 2 - 1];
     }
     int attackat(int r) {
         r++;
-        return a[r/2 - 1];
+        return a[r / 2 - 1];
     }
     int defendat(int r) {
         r++;
-        return d[r/2 - 1];
+        return d[r / 2 - 1];
     }
     int healat(int r) {
         r++;
-        return h[r/2 - 1];
+        return h[r / 2 - 1];
     }
 };
 
@@ -105,9 +105,9 @@ pair<int, int> better(int id, pair<int, int> a, pair<int, int> b) {
 }
 
 pair<int, int> play(int round, ma& m1, ma& m2) {
-    /* if (round >= 13) {
-        throw "";
-    } */
+    if (round > 12) {
+        return {m1.id, round};
+    }
 
     pair<int, int> lim = {-1, 0};
     bool dosomething = false;
@@ -170,6 +170,7 @@ int main() {
     cin >> t;
     for (int i = 1; i <= t; i++) {
         auto a = solve();
+        if (a.first != 1 && a.first != 2) throw "";
         printf("Case #%d: %s %d\n", i, a.first == 1 ? "win" : "lose", a.second);
     }
     return 0;
