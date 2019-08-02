@@ -24,70 +24,44 @@ vector<vector<point>> find(const vector<string>& table) {
             if (c == '.') continue;
 
             queue<point> q;
-            /* if (is_valid({x - 1, y}, c, table) || is_valid({x + 1, y}, c, table) || is_valid({x, y - 1}, c, table) ||
-                is_valid({x, y + 1}, c, table)) {
-                  q.push({x, y});
-            }  //
-            else {
-                continue;
-            } */
             q.push({x, y});
+
+            auto test = [&](int x, int y) {
+                if (is_valid({x, y}, c, table) && !visited[x][y]) {
+                    visited[x][y] = true;
+                    q.push({x, y});
+                }
+            };
 
             vector<point> ret;
             while (!q.empty()) {
-                // cout << q.size() << endl;
                 point p = q.front();
-                // cout << p.x << p.y << endl;
                 q.pop();
                 ret.push_back(p);
-
-                if (is_valid({p.x - 1, p.y}, c, table) && !visited[p.x - 1][p.y]) {
-                    visited[p.x - 1][p.y] = true;
-                    q.push({p.x - 1, p.y});
-                };
-                if (is_valid({p.x + 1, p.y}, c, table) && !visited[p.x + 1][p.y]) {
-                    visited[p.x + 1][p.y] = true;
-                    q.push({p.x + 1, p.y});
-                };
-                if (is_valid({p.x, p.y - 1}, c, table) && !visited[p.x][p.y - 1]) {
-                    visited[p.x][p.y - 1] = true;
-                    q.push({p.x, p.y - 1});
-                };
-                if (is_valid({p.x, p.y + 1}, c, table) && !visited[p.x][p.y + 1]) {
-                    visited[p.x][p.y + 1] = true;
-                    q.push({p.x, p.y + 1});
-                };
+                test(p.x - 1, p.y);
+                test(p.x + 1, p.y);
+                test(p.x, p.y - 1);
+                test(p.x, p.y + 1);
             }
-            // for (auto p : ret) cout << p.x << p.y << " ";
-            // cout << endl;
             if (ret.size() > 1) found.push_back(ret);
         }
     return found;
 }
 
-bool clear(const vector<string>& table) {
+bool is_stage_clear(const vector<string>& table) {
     for (int i = 0; i < 5; i++)
         if (table[i] != "......") return false;
     return true;
 }
 
-string strtable(const vector<string>& table) {
+string table2str(const vector<string>& table) {
     string s = "";
     for (string a : table) s += a;
     return s;
 }
 
 bool judge(const vector<string>& table) {
-    // string s;
-    // getline(cin, s);
-
     auto v = find(table);
-    // cout << v.size() << endl;
-    // while (!v.empty()) {
-    // for (string s : table) cout << s << endl;
-    // cout << endl;
-
-    // cout << v.size() << endl;
     for (auto& p : v) {
         auto tt = table;
         for (auto& loc : p) tt[loc.x][loc.y] = '.';
@@ -96,8 +70,7 @@ bool judge(const vector<string>& table) {
                 if (tt[x][y] != '.') continue;
                 for (int u = x - 1; u > -1; u--) {
                     if (tt[u][y] != '.') {
-                        tt[x][y] = tt[u][y];
-                        tt[u][y] = '.';
+                        swap(tt[x][y], tt[u][y]);
                         break;
                     }
                 }
@@ -107,41 +80,28 @@ bool judge(const vector<string>& table) {
         bool cleared[6] = {false};
         for (int y = 0; y < 6; y++) {
             cleared[y] = [&] {
-                for (int x = 0; x < 5; x++) {
+                for (int x = 0; x < 5; x++)
                     if (tt[x][y] != '.') return false;
-                }
                 return true;
             }();
         }
         for (int y = 0; y < 6; y++) {
             if (!cleared[y]) continue;
-            int r = -1;
-            for (int u = y + 1; u < 6; u++) {
-                if (!cleared[u]) {
-                    r = u;
-                    break;
-                }
-            }
+            int r = [&]() {
+                for (int u = y + 1; u < 6; u++)
+                    if (!cleared[u]) return u;
+                return -1;
+            }();
             if (r == -1) break;
-            for (int x = 0; x < 5; x++) {
-                tt[x][y] = tt[x][r];
-                tt[x][r] = '.';
-            }
+            for (int x = 0; x < 5; x++) swap(tt[x][y], tt[x][r]);
             cleared[r] = true;
         }
 
-      //  for(string s: tt) cout << s << endl;
-      //  cout << endl;
-
-        if (clear(tt)) return true;
-        string h = strtable(tt);
-        // cout << h << endl;
+        if (is_stage_clear(tt)) return true;
+        string h = table2str(tt);
         if (record.count(h)) continue;
         record.insert(h);
         if (judge(tt)) return true;
-        //}
-
-        // v = find(tt);
     }
 
     return false;
@@ -150,10 +110,8 @@ bool judge(const vector<string>& table) {
 bool solve() {
     vector<string> table(5);
     for (int i = 0; i < 5; i++) cin >> table[i];
-    // for (string s : table) cout << s << endl;
-    // cout << endl;
     record.clear();
-    record.insert(strtable(table));
+    record.insert(table2str(table));
     return judge(table);
 }
 
