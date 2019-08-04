@@ -41,9 +41,9 @@ struct CounterBIT {
 struct SumBIT {
     int ninsert = 0;
     vector<bool> rec;
-    vector<int> tvec;
+    vi tvec;
     BIT bit;
-    SumBIT(const vector<int>& vec) : tvec(vec), bit(vec.size()) {
+    SumBIT(const vi& vec) : tvec(vec), bit(vec.size()) {
         rec.assign(vec.size(), false);
         sort(iter(tvec));
     }
@@ -57,7 +57,7 @@ struct SumBIT {
     int size() const { return ninsert; }
 };
 
-vi ranksort(const vector<int>& vec) {
+vi ranksort(const vi& vec) {
     vi indices(vec.size());
     for (int i = 0; i < vec.size(); i++) indices[i] = i;
     sort(iter(indices), [&vec](int i, int j) { return vec[i] < vec[j]; });
@@ -67,7 +67,7 @@ vi ranksort(const vector<int>& vec) {
     return rank;
 }
 
-ll solve(const vector<int>& vec, const vector<int>& rnk, int initloc) {
+ll solve(const vi& vec, const vi& rnk, int initloc) {
     int loc = initloc;
     auto findleft = [&loc]() {
         int initl = K - 1 - loc;
