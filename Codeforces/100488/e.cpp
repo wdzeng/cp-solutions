@@ -1,24 +1,22 @@
-#include <iostream>
-#include <cstring>
+#include <bits/stdc++.h>
 using namespace std;
-// AC
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<double, double> pdd;
+#define iter(x) x.begin(), x.end()
+#define ms(x) memset(x, 0, sizeof(x))
+#define mss(x) memset(x, -1, sizeof(x))
+
 int main() {
-    int arr[26] = {0};
-    char buff[400002];
-    cin >> buff;
-    if(strlen(buff)%2==1) {
-        cout << "NO\n";
-        return 0;
-    }
-    for (char c : buff) {
-        if (c == '\0') break;
-        for (char i = 'a'; i <= 'z'; i++) {
-            arr[i - 'a'] += (c == i ? 1 : -1);
-        }
-    }
-    for(int i: arr) {
-        if(i>0) {cout << "NO\n"; return 0;}
-    }
+    cin.tie(NULL), ios::sync_with_stdio(false);
+    string s;
+    cin >> s;
+    if (s.size() % 2) cout << "NO\n", exit(0);
+
+    vector<int> vec(26, 0);
+    for (char c : s)
+        if (++vec[c - 'a'] > s.size() / 2) cout << "NO\n", exit(0);
+
     cout << "YES\n";
     return 0;
 }
