@@ -1,90 +1,94 @@
 #include <bits/stdc++.h>
-#include <string.h>
-#include <iostream>
-#include <list>
-#include <string>
-
-// AC
-
-#define numlen 18
-#define format "%018ld"
-#define lim 1000000000000000000L
 using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<double, double> pdd;
+const double PI = acos(-1);
+#define x first
+#define y second
+#define iter(c) c.begin(), c.end()
+#define ms(a) memset(a, 0, sizeof(a))
+#define mss(a) memset(a, -1, sizeof(a))
+#define mp(e, f) make_pair(e, f)
 
-list<long> bigint;
+struct BigInt {
+    static const int D = 18;
+    static const ll M = 1e18;
 
-void add(char* s) {
-    auto it = bigint.rbegin();
-    int cursor = strlen(s);
-    bool carry = false;
-    bool end = false;
-    while (cursor) {
-        cursor = max(0, cursor - numlen);
-        long added = atol(s + cursor) + carry;
-        if (end || it == bigint.rend()) {
-            if (added >= lim) {
-                added -= lim;
-                carry = true;
-            } else
-                carry = false;
-            bigint.push_front(added);
-            end = true;
-        } else {
-            int org = *it;
-            *it += added;
-            if (*it >= lim) {
-                *it -= lim;
-                carry = true;
-            } else
-                carry = false;
-            it++;
-        }
-        s[cursor] = '\0';
-    }
-    if (carry) {
-        while (it != bigint.rend()) {
-            *it += 1;
-            if (*it == lim) {
-                *it = 0;
-                it++;
-            } else {
-                return;
+    list<ll> val;
+    bool neg = false;
+    BigInt() {}
+
+    list<ll> stobigint(string s) {
+        list<ll> ret;
+        while (!s.empty()) {
+            string vs = "";
+            for (int i = 0; i < D && !s.empty(); i++) {
+                vs += s.back();
+                s.pop_back();
             }
+            reverse(iter(vs));
+            ret.push_front(stoll(vs));
         }
-        bigint.push_front(1);
-    }
-}
-
-void solve(string& line) {
-    char* str = (char*)line.c_str();
-    char* token = strtok(str, " ");
-    while (token != NULL) {
-        add(token);
-        token = strtok(NULL, " ");
+        return ret;
     }
 
-    bool start = false;
-    auto it = bigint.begin();
-    while (it != bigint.end()) {
-        if (start)
-            printf(format, *it);
-        else {
-            if (*it) {
-                cout << *it;
-                start = true;
-            }
+    BigInt& operator+=(const string& s) {
+        list<ll> l = stobigint(s);
+        list<ll> u;
+
+        bool c = false;
+        while (!l.empty() || !val.empty()) {
+            ll vl = l.empty() ? 0 : l.back();
+            ll vv = val.empty() ? 0 : val.back();
+            u.push_front(vl + vv + c);
+
+            c = u.front() >= M;
+            if (c) u.front() -= M;
+            if (!l.empty()) l.pop_back();
+            if (!val.empty()) val.pop_back();
         }
-        it++;
+
+        if (c) u.push_front(1);
+
+        while (!u.empty() && u.front() == 0) {
+            u.pop_front();
+        }
+
+        val.swap(u);
+        return *this;
     }
-    if (!start) cout << 0;
-    cout << "\n";
-}
+
+    void output() const {
+        if (val.empty()) {
+            printf("0");
+            return;
+        }
+        bool first = true;
+        for (ll v : val) {
+            if (first)
+                printf("%lld", v);
+            else
+                printf("%018lld", v);
+            first = false;
+        }
+    }
+};
 
 int main() {
-    static string input;
-    while (getline(cin, input)) {
-        bigint.clear();
-        solve(input);
+    cin.tie(0), ios::sync_with_stdio(0);
+    while (1) {
+        string line;
+        getline(cin, line);
+        if (line.empty()) break;
+        BigInt b;
+        stringstream ss(line);
+        string s;
+        while (ss >> s) {
+            b += s;
+        }
+        b.output();
+        printf("\n");
     }
     return 0;
 }
