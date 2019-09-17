@@ -15,7 +15,7 @@ inline bool assure(bool b) {
     if (!b) throw "";
 }
 
-struct compiler {
+struct pH {
     unordered_map<string, int> varlen;
     unordered_map<string, unordered_map<int, int>> assigned;
     void declare(string varname, int len) {
@@ -41,7 +41,7 @@ struct compiler {
 };
 
 int solve(const vector<string>& codes) {
-    compiler cc;
+    pH cc;
     int c = 1;
     try {
         for (const string& statement : codes) {
