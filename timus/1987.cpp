@@ -100,8 +100,7 @@ int main() {
         all_nums.insert(x);
     }
 
-    int counter = 0;
-    for (int num : all_nums) order[num] = counter++;
+    for (int num : all_nums) order[num] = order.size();
 
     davidtree dt(order.size());
     for (auto& sg : segments) {
