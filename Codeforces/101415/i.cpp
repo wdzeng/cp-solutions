@@ -38,7 +38,6 @@ inline pii intersect(const seg& a, const seg& b) { return a.loc + a.vec * (b.vec
 
 bool is_intersected(vector<seg>& segments) {
     const int N = segments.size();
-    sort(iter(segments), [](seg& a, seg& b) { return a.vec < b.vec; });
     deque<pii> p;
     deque<seg> q;
     for (auto& s : segments) {
@@ -102,7 +101,7 @@ struct pI {
 };
 
 int main() {
-    freopen("data/I.in", "r", stdin);
+    freopen("I.in", "r", stdin);
     cin.tie(0), ios::sync_with_stdio(0);
     int n;
     while (cin >> n && n) printf("%.6lf\n", pI(n).solve());
