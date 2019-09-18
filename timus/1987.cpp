@@ -1,9 +1,10 @@
-#include <bits/stdc++.h>
 #include <vector>
 #include <set>
 #include <unordered_map>
 #include <utility>
 #include <algorithm>
+#include <climits>
+#include <iostream>
 using namespace std;
 typedef pair<int, int> pii;
 
@@ -15,7 +16,7 @@ struct davidtree {
 
     davidtree(int n) : N(n) {
         arr.resize(4 * N);
-        stamp.assign(4 * N, false);
+        stamp.resize(4 * N);
         stamp[0] = true;
         arr[0] = {INT_MAX, -1};
     }
@@ -44,7 +45,6 @@ struct davidtree {
         if (stamp[i]) {
             stamp[i * 2 + 1] = stamp[i * 2 + 2] = true;
             arr[i * 2 + 1] = arr[i * 2 + 2] = arr[i];
-            cout << flush;
         }
 
         // go down
@@ -55,7 +55,6 @@ struct davidtree {
 
         // if this node has no stamp, check if it can have a stamp.
         if (!stamp[i] && stamp[i * 2 + 1] && stamp[i * 2 + 2] && arr[i * 2 + 1] == arr[i * 2 + 2]) {
-            cout << flush;
             stamp[i] = true;
             arr[i] = arr[i * 2 + 1];
         }
