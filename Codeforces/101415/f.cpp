@@ -81,7 +81,7 @@ struct pF {
 };
 
 int main() {
-    // freopen("F.in", "r", stdin);
+    freopen("F.in", "r", stdin);
     cin.tie(0), ios::sync_with_stdio(0);
     int n, m;
     while (cin >> n >> m && n) {

@@ -11,7 +11,7 @@ const double PI = acos(-1);
 #define mss(a) memset(a, -1, sizeof(a))
 #define mp(e, f) make_pair(e, f)
 
-struct Game {
+struct pC {
     const int N;
     const int T;
     const double R = 1.0 / 6;
@@ -22,7 +22,7 @@ struct Game {
     vector<double> rate;
     vector<double> rate_pause;
 
-    Game(int n, int t, int nl, int nb) : N(n), T(t) {
+    pC(int n, int t, int nl, int nb) : N(n), T(t) {
         while (nl--) {
             int x;
             cin >> x;
@@ -74,10 +74,11 @@ struct Game {
 };
 
 int main() {
+    freopen("C.in", "r", stdin);
     cin.tie(0), ios::sync_with_stdio(0);
     int n, t, l, b;
     while (cin >> n >> t >> l >> b && n) {
-        cout << Game(n, t, l, b).solve() << endl;
+        cout << pC(n, t, l, b).solve() << endl;
     }
     return 0;
 }
