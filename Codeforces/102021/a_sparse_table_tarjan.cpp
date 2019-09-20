@@ -23,11 +23,13 @@ class SparseTableTarjan {
 
     void dfs(int u, const vector<vector<int>>& edge, int d) {
         dep[u] = d;
+
         for (int i = 1; i < maxlg; i++)
-            if (anc[u][i - 1] < 0)
-                anc[u][i] = -1;
+            if (anc[u][i - 1] == -1)
+                break;
             else
                 anc[u][i] = anc[anc[u][i - 1]][i - 1];
+       
         for (int a : edge[u]) {
             if (dep[a] != -1) continue;
             anc[a][0] = u;
@@ -37,15 +39,16 @@ class SparseTableTarjan {
 
    public:
     SparseTableTarjan(const vector<vector<int>>& edge, int root) : n(edge.size()), maxlg(__lg(n)) {
-        anc.assign(n, vector<int>(maxlg));
+        anc.assign(n, vector<int>(maxlg, -1));
         dep.assign(n, -1);
         dfs(root, edge, 0);
     }
 
+    // O(logN)
     int lca(int a, int b) {
         if (dep[a] > dep[b]) swap(a, b);
-        for (int k = 0; k < maxlg; k++)
-            if ((dep[b] - dep[a]) >> k & 1) b = anc[b][k];
+        for (int k = 0; dep[b] - dep[a]; k++)
+            if (((dep[b] - dep[a]) >> k) & 1) b = anc[b][k];
 
         if (a == b) return a;
         for (int k = maxlg - 1; k >= 0; k--)
@@ -53,6 +56,7 @@ class SparseTableTarjan {
         return anc[a][0];
     }
 
+    // O(logN)
     int dist(int a, int b) { return dep[a] + dep[b] - 2 * dep[lca(a, b)]; }
 };
 
@@ -105,3 +109,32 @@ int main() {
     cout << sum << endl;
     return 0;
 }
+
+/*
+2 6
+ _ _ _ _ _ _
+|  _ _ _ _ _|
+|_ _ _ _ _ _|
+5
+1 5
+1 1
+1 6
+1 1
+1 5
+
+5 5
+ _ _ _ _ _
+|_ _  |_  |
+|  _| |  _|
+| |_   _| |
+|    _ _  |
+|_|_ _ _|_|
+7
+4 4
+1 4
+3 1
+4 5
+1 2
+2 2
+5 4
+*/
