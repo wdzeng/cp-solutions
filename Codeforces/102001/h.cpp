@@ -1,98 +1,92 @@
-#pragma GCC optimize("O3", "unroll-loops")
 #include <bits/stdc++.h>
-#define INF 2147483647
-
 using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<double, double> pdd;
+const double PI = acos(-1);
+#define x first
+#define y second
+#define iter(c) c.begin(), c.end()
+#define ms(a) memset(a, 0, sizeof(a))
+#define mss(a) memset(a, -1, sizeof(a))
+#define mp(e, f) make_pair(e, f)
 
-const int maxn = 1e5 + 10;
+/**
+ * Support single element increment and range sum query.
+ *
+ * Time Complexity: O(QlogN)
+ * Space Complexity: O(N)
+ */
+class BIT {
+   private:
+    int n;
+    vector<ll> a;
 
-int n, ones[maxn << 2], st[maxn << 2];
-
-void build(int t, int l, int r) {
-    if (r - l == 1) return st[t] = -l, void();
-    int mid = (l + r) >> 1;
-    build(t << 1, l, mid);
-    build(t << 1 | 1, mid, r);
-    st[t] = min(st[t << 1], st[t << 1 | 1]);
-}
-
-void modify(int t, int l, int r, int x, int v) {
-    if (r - l == 1) {
-        if (v == 1)
-            ones[t] = 1, st[t] = 1e9;
-        else if (v == -1)
-            ones[t] = 0, st[t] = 1e9;
-        return;
+    ll sum(int i) {
+        i++;
+        ll r = 0;
+        while (i > 0) r += a[i], i -= i & -i;
+        return r;
     }
-    int mid = (l + r) >> 1;
-    if (x < mid)
-        modify(t << 1, l, mid, x, v);
-    else
-        modify(t << 1 | 1, mid, r, x, v);
-    st[t] = min(st[t << 1], st[t << 1 | 1]);
-}
 
-int query_ones(int t, int l, int r, int ql, int qr) {
-    if (r <= ql || qr <= l) return 0;
-    if (ql <= l && r <= qr) return ones[t];
-    int mid = (l + r) >> 1;
-    return query_ones(t << 1, l, mid, ql, qr) + query_ones(t << 1 | 1, mid, r, ql, qr);
-}
+   public:
+    // Constructs an binary indexed tree with all values initialized to 0, where n is size of array.
+    BIT(int n) : n(n) { a.resize(n + 1); }
+    // Increases element at index i by value v, where i in [1, n].
+    void add(int i, ll v) {
+        i++;
+        while (i <= n) a[i] += v, i += i & -i;
+    }
+    // Queries sum in [l, r], where l and r in [1, n].
+    ll sum(int l, int r) { return sum(r) - sum(l - 1); }
+};
 
-int query_last_zero(int t, int l, int r, int ql, int qr) {
-    if (r <= ql || qr <= l) return 1e9;
-    if (ql <= l && r <= qr) return st[t];
-    int mid = (l + r) >> 1;
-    return min(query_last_zero(t << 1, l, mid, ql, qr), query_last_zero(t << 1 | 1, mid, r, ql, qr));
-}
+struct cmd {
+    int l, r, req;
+    cmd(int l, int r, int q) : l(l), r(r), req(q) {}
+    bool operator<(const cmd& c) const { return r < c.r; }
+};
 
-// 1-base, [)
+void foul() {
+    cout << "Impossible\n";
+    exit(0);
+}
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    int n, lm;
-    cin >> n >> lm;
-    build(1, 1, n + 1);
-    for (int i = 1; i <= n; i++) {
-        int v;
-        cin >> v;
-        if (v == 1) modify(1, 1, n + 1, i, 1);
-        if (v == -1) modify(1, 1, n + 1, i, -1);
+    cin.tie(0), ios::sync_with_stdio(0);
+    int n, q;
+    cin >> n >> q;
+    BIT b(n);
+    set<int> hole;
+    for (int i = 0; i < n; i++) {
+        int x;
+        cin >> x;
+        if (x == 0) hole.insert(i), x = -1;
+        b.add(i, x);
     }
 
-    for (int i = 1; i <= n; i++) {
-        cout << (query_ones(1, 1, n + 1, i, i + 1) ? 1 : -1) << ' ';
+    vector<cmd> cmds;
+    while (q--) {
+        int l, r, req;
+        cin >> l >> r >> req;
+        l--, r--;
+        cmds.emplace_back(l, r, req);
     }
-    cout << endl;
-
-    while (lm--) {
-        int l, r, c;
-        cin >> l >> r >> c;
-        int n1 = query_ones(1, 1, n + 1, l, r + 1);
-        cout << n1 << "?\n";
-        c = max((l + c + 1) / 2, 0);
-        c -= n1;
-        while (c > 0) {
-            int loc = query_last_zero(1, 1, n + 1, l, r + 1);
-            //cout << loc << "!\n";
-            if (loc > 0) {
-                cout << "Impossible" << endl;
-                return 0;
-            }
-            modify(1, 1, n + 1, -loc, 1);
-            c--;
-            
+    sort(iter(cmds));
+    for (auto& c : cmds) {
+        int s = b.sum(c.l, c.r);
+        while (s < c.req) {
+            auto a = hole.upper_bound(c.r);
+            if (a == hole.begin()) foul();
+            a--;
+            int i = *a;
+            b.add(i, 2);
+            s += 2;
+            hole.erase(a);
         }
-        for (int i = 1; i <= n; i++) {
-                cout << (query_ones(1, 1, n + 1, i, i + 1) ? 1 : -1) << ' ';
-            }
-            cout << endl;
     }
 
-    for (int i = 1; i <= n; i++) {
-        cout << (query_ones(1, 1, n + 1, i, i + 1) ? 1 : -1) << " \n"[i == n];
-    }
+    for (int i = 0; i < n; i++) cout << b.sum(i, i) << ' ';
+    cout << '\n';
     return 0;
 }
