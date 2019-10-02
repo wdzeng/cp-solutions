@@ -54,7 +54,7 @@ int sum(int i, int curl, int curr, int tarl, int tarr) {
 int sum(int l, int r) { return sum(0, 0, maxn - 1, l, r); }
 
 int main() {
-    // cin.tie(0), ios::sync_with_stdio(0);
+    cin.tie(0), ios::sync_with_stdio(0);
     int q;
     cin >> q;
     while (q--) {
