@@ -13,18 +13,7 @@ const double PI = acos(-1);
 
 int main() {
     // cin.tie(0), ios::sync_with_stdio(0);
-    int n;
-    int dp[n][2][2];
-    ms(dp);
-    dp[0][0][0] = 1;
-    dp[0][1][0] = 1;
-
-    for (int i = 1; i < n; i++) {
-        dp[i][0][0] = dp[i - 1][1][0] + dp[i - 1][1][1];
-        dp[i][1][0] = dp[i - 1][0][0] + dp[i - 1][0][1];
-        dp[i][0][1] = dp[i - 1][0][0];
-        dp[i][1][1] = dp[i - 1][1][0];
-    }
-
+    cout << 1000 << endl;
+    for(int i=0; i<1000;i++) cout << 1 << ' ';
     return 0;
 }
