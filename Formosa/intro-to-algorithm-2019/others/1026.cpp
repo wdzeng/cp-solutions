@@ -24,19 +24,16 @@ void prim(int src, ll* ret) {
     for (int i = 0; i < n; i++) ret[i] = inf;
     bool vis[n];
     memset(vis, 0, n);
-
-    int rem = n - 1;
     ret[src] = 0;
 
-    while (rem) {
-        int v = next(ret, vis);
+    int v;
+    while ((v = next(ret, vis)) != -1) {
         for (auto& a : adj[v]) {
             int u = a.second;
             ll ucost = a.first;
             ret[u] = min(ret[u], max(ret[v], ucost));
         }
         vis[v] = 1;
-        rem--;
     }
 }
 
