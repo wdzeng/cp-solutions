@@ -31,8 +31,7 @@ int main() {
     cin.tie(0), ios::sync_with_stdio(0);
     int n, m;
     cin >> n >> m;
-    vector<vector<pii>> adj(n + 1, vector<pii>());
-    auto adj_rev = adj;
+    vector<vector<pii>> adj(n + 1), adj_rev(n + 1);
     while (m--) {
         int a, b, l;
         cin >> a >> b >> l;
