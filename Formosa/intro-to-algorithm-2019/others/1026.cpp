@@ -12,10 +12,8 @@ int next(ll* cost, bool* vis) {
     int ret = -1;
     for (int i = 0; i < n; i++) {
         if (vis[i]) continue;
-        if (ret == -1)
-            ret = i;
-        else if (cost[i] < cost[ret])
-            ret = i;
+        else if (ret == -1) ret = i;
+        else if (cost[i] < cost[ret]) ret = i;
     }
     return ret;
 }
