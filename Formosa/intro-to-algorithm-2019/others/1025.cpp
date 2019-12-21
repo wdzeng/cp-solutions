@@ -7,7 +7,7 @@ const int maxn = 2e3 + 5;
 const ll inf = 1e18;
 
 vector<ll> dijkstra(int src, vector<vector<pii>>& adj) {
-    vector<ll> ret(maxn, 1e18);
+    vector<ll> ret(maxn, inf);
     priority_queue<pii, vector<pii>, greater<pii>> q;
     q.emplace(0, src);
 
@@ -31,20 +31,20 @@ int main() {
     cin.tie(0), ios::sync_with_stdio(0);
     int n, m;
     cin >> n >> m;
-    vector<vector<pii>> adj0(n + 1, vector<pii>());
-    auto adj1 = adj0;
+    vector<vector<pii>> adj(n + 1, vector<pii>());
+    auto adj_rev = adj;
     while (m--) {
         int a, b, l;
         cin >> a >> b >> l;
-        adj0[b].emplace_back(l, a);  // reverse
-        adj1[a].emplace_back(l, b);  // reverse
+        adj_rev[b].emplace_back(l, a);  // reverse
+        adj[a].emplace_back(l, b);
     }
 
-    auto minpath0 = dijkstra(0, adj0);
-    auto minpath1 = dijkstra(0, adj1);
+    auto min_path = dijkstra(0, adj);
+    auto min_path_rev = dijkstra(0, adj_rev);
     ll ans = 0;
     for (int i = 1; i <= n; i++) {
-        ans += minpath0[i] + minpath1[i];
+        ans += min_path[i] + min_path_rev[i];
     }
 
     cout << ans << '\n';
