@@ -15,11 +15,10 @@ int main() {
     for (int i = 0; i < n; i++) cin >> a[i];
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
-            for (int k = 0; k < n; k++)
-                if (i == j || j == k || k == i)
-                    continue;
-                else
-                    flag &= ((a[i] - a[j]) % a[k] == 0);
+            for (int k = 0; k < n; k++) {
+                if (i == j || j == k || k == i) continue;
+                flag &= ((a[i] - a[j]) % a[k] == 0);
+            }
     printf("%s\n", flag ? "yes" : "no");
     return 0;
 }

@@ -1,61 +1,61 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
 using namespace std;
-typedef long long ll;
-typedef pair<ll, int> pii;
 
-const int maxn = 500;
-const ll inf = 1e18;
-vector<pii> adj[maxn];
+const long long INFINITY = 1e18;
+vector<pair<long long, int>> adj[500];
 int n;
 
-int next(ll* cost, bool* vis) {
-    int ret = -1;
-    for (int i = 0; i < n; i++) {
-        if (vis[i]) continue;
-        else if (ret == -1) ret = i;
-        else if (cost[i] < cost[ret]) ret = i;
-    }
-    return ret;
-}
+vector<long long> dijk(int s) {
+    vector<long long> min_cost(n, INFINITY);
+    vector<bool> is_visited(n, false);
+    min_cost[s] = 0;
 
-void prim(int src, ll* ret) {
-    for (int i = 0; i < n; i++) ret[i] = inf;
-    bool vis[n];
-    memset(vis, 0, n);
-    ret[src] = 0;
+    while (true) {
+        int v = -1;
+        long long minn = INFINITY;
+        for (int i = 0; i < n; i++) {
+            if (!is_visited[i]) {
+                if (v == -1 || min_cost[i] < minn) {
+                    v = i;
+                    minn = min_cost[i];
+                }
+            }
+        }
+        if (v == -1) break;
 
-    int v;
-    while ((v = next(ret, vis)) != -1) {
         for (auto& a : adj[v]) {
             int u = a.second;
-            ll ucost = a.first;
-            ret[u] = min(ret[u], max(ret[v], ucost));
+            long long cc = a.first;
+            cc = max(min_cost[v], cc);
+            min_cost[u] = min(min_cost[u], cc);
         }
-        vis[v] = 1;
+        is_visited[v] = true;
     }
+
+    return min_cost;
 }
 
 int main() {
-    cin.tie(0), ios::sync_with_stdio(0);
     int m, q;
     cin >> n >> m >> q;
+
+    int a, b, cost;
     while (m--) {
-        int a, b, c;
-        cin >> a >> b >> c;
-        adj[a].emplace_back(c, b);
+        cin >> a >> b >> cost;
+        adj[a].push_back(pair<long long, int>(cost, b));
     }
 
-    ll min_cost_table[n][n];
+    vector<vector<long long>> table;
     for (int i = 0; i < n; i++) {
-        prim(i, min_cost_table[i]);
+        table.push_back(dijk(i));
     }
 
+    int s, d;
     while (q--) {
-        int src, dst;
-        cin >> src >> dst;
-        ll ans = max(min_cost_table[src][dst], min_cost_table[dst][src]);
-        if (ans == inf) ans = -1;
+        cin >> s >> d;
+        long long ans = max(table[s][d], table[d][s]);
+        if (ans == INFINITY) ans = -1;
         cout << ans << '\n';
     }
-    return 0;
 }

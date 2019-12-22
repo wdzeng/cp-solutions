@@ -9,11 +9,10 @@ pii operator-(const pii& a, const pii& b) { return pii(a.first * b.second - b.fi
 ll solve(int n) {
     pii nn(1, n);
     ll ret = 0;
-    for (int i = n; i <= 2 * n; i++) {
+    for (int i = n + 1; i <= 2 * n; i++) {
         pii p(1, i);
         pii rem = nn - p;
         swap(rem.first, rem.second);
-        if (rem.second == 0) continue;
         if (rem.first % rem.second == 0) {
             ll c = rem.first / rem.second;
             ll a = c ^ i;
