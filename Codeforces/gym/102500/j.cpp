@@ -1,3 +1,4 @@
+#pragma GCC optimization("Ofast", "unroll-loops")
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
@@ -27,7 +28,7 @@ int main() {
     ll c, r;
     cin >> n >> c >> r;
     vector<ll> v(n);
-    for (auto& val : v) cin >> val;
+    for (int i = 0; i < n; i++) cin >> v[i];
 
     int nr = 0;
     int p = -1;
@@ -44,43 +45,53 @@ int main() {
     ll ans = nr * r;
 
     p = -1;
-    int prv[n], nxt[n];
+    int f = -1;
+    vector<int> prv(n), nxt(n);
     for (int i = 0; i < n; i++) {
         if (v[i] == 0) continue;
         if (p != -1) nxt[p] = i;
         prv[i] = p;
         p = i;
+        if (f == -1) f = i;
     }
     if (p != -1) nxt[p] = -1;
+    int l = p;
 
-    vector<pair<ll, int>> vs;
-    for (int i = 0; i < n; i++) vs.emplace_back(abs(v[i]), i);
-    sort(all(vs));
+    if (f == -1) {
+        cout << min(r * n, c) << endl;
+        return 0;
+    }
 
     nr = 0;
-    for (int i = 0; i < n; i++) {
-        if (v[i] == 0) continue;
+    for (int i = nxt[f]; i != -1; i = nxt[i]) {
+        assert(i >= 0 and i < n);
         nr += bad(v, i, prv[i]);
     }
     ans = min(ans, nr * r + c);
 
-    for (auto& p : vs) {
+    vector<pair<ll, int>> vs;
+    for (int i = 0; i < n; i++) {
+        if (v[i] != 0) vs.emplace_back(abs(v[i]), i);
+    }
+    sort(all(vs));
+
+    for (const auto& p : vs) {
         int index = p.y;
         ll fake = p.x + 1;
-        if (fake == 1) continue;
         int pindex = prv[index];
         int nindex = nxt[index];
+        assert(index >= 0 and index < n);
 
         if (pindex == -1) {
             if (nindex != -1) {
                 if (bad(v, index, nindex)) nr--;
                 prv[nindex] = -1;
             }
-        } //
+        }  //
         else if (nindex == -1) {
             if (bad(v, index, pindex)) nr--;
             nxt[pindex] = -1;
-        } //
+        }  //
         else {
             if (bad(v, index, pindex)) nr--;
             if (bad(v, index, nindex)) nr--;
