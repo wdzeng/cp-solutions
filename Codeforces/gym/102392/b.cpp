@@ -1,40 +1,69 @@
-#pragma GCC optimize("Ofast")
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long ll;
-typedef pair<ll, ll> pll;
 typedef pair<int, int> pii;
-#define pb push_back
-#define INF 1000000000000000LL
+#define x first
+#define y second
+#define all(v) v.begin(), v.end()
+#define ms(v) memset(v, 0, sizeof(v))
+#define mss(v) memset(v, -1, sizeof(v))
+
+inline void setmin(ll& val, ll c) {
+    val = min(val, c);
+}
+
+struct mission {
+    int e1;
+    ll t1;
+    int e2;
+    ll t2;
+};
+
+const ll INF = 1e15;
+ll dp[501][501];
+ll newdp[501][501];
+
 int main() {
-    ios_base::sync_with_stdio(0);
-    cin.tie(0);
-    int n, s1, s2;
-    cin >> n >> s1 >> s2;
-    vector<int> e1(n), e2(n), t1(n), t2(n);
-    for (int i = 0; i < n; i++) {
-        int x, t, y, r;
-        cin >> x >> t >> y >> r;
-        e1[i] = x, e2[i] = y;
-        t1[i] = t, t2[i] = r;
+    cin.tie(0), ios::sync_with_stdio(0);
+
+    int q, s1, s2;
+    cin >> q >> s1 >> s2;
+    vector<mission> msss(q);
+    for (auto& m : msss) cin >> m.e1 >> m.t1 >> m.e2 >> m.t2;
+    sort(all(msss), [](const auto& a, const auto& b) { return a.e1 < b.e1; });
+
+    for (int i = 0; i < 501; i++) {
+        for (int j = 0; j < 501; j++) {
+            dp[i][j] = newdp[i][j] = INF;
+        }
     }
-    int a1 = s1 + s2 + 505, a2 = s2 + 505;
-    vector<vector<ll>> dp(a1 + 1, vector<ll>(a2 + 1, INF));
     dp[0][0] = 0;
-    for (int i = 0; i < n; i++)
-        for (int j = a1; j >= 0; j--)
-            for (int k = a2; k >= 0; k--) {
-                if (j >= e1[i]) dp[j][k] = min(dp[j][k], dp[j - e1[i]][k] + t1[i]);
-                if (k >= e2[i]) dp[j][k] = min(dp[j][k], dp[j][k - e2[i]] + t2[i]);
+    newdp[0][0] = 0;
+
+    for (int t = 0; t < q; t++) {
+        for (int i = 0; i <= s1; i++) {
+            for (int j = 0; j <= s2; j++) {
+                if (i < s1) {
+                    int anewe1 = i + msss[t].e1;
+                    int anewe2 = j;
+                    if (anewe1 > s1) {
+                        anewe2 += (anewe1 - s1);
+                        anewe1 = s1;
+                    }
+                    anewe2 = min(anewe2, s2);
+                    ll ares = dp[i][j] + msss[t].t1;
+                    setmin(newdp[anewe1][anewe2], ares);
+                }
+
+                int bnewe1 = i;
+                int bnewe2 = min(s2, j + msss[t].e2);
+                ll bres = dp[i][j] + msss[t].t2;
+                setmin(newdp[bnewe1][bnewe2], bres);
             }
-    ll ans = INF;
-    for (int i = s1; i <= a1; i++) {
-        for (int j = max(0, s2 - i + s1); j <= a2; j++)
-            ans = min(ans, dp[i][j]);
+        }
+        memcpy(dp, newdp, sizeof(dp));
     }
-    if (ans == INF)
-        cout << -1 << "\n";
-    else
-        cout << ans << "\n";
+
+    cout << (dp[s1][s2] == INF ? -1 : dp[s1][s2]) << endl;
     return 0;
 }

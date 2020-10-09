@@ -8,208 +8,159 @@ typedef pair<int, int> pii;
 #define ms(v) memset(v, 0, sizeof(v))
 #define mss(v) memset(v, -1, sizeof(v))
 
-inline int dd(const pii& p, int n) {
+int n;
+const int N = 30;
+int g[N][N];
+vector<pii> ans;
+
+inline int id(const pii& p) {
     return p.x * n + p.y;
 }
 
-vector<string> G;
-vector<pii> ans;
-vector<pii> _d = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
-
-inline int good(const pii& p, int n) {
-    const int n = G.size();
-    return p.x >= 0 and p.x < n and p.y >= 0 and p.y < n;
+inline pii pd(int l) {
+    return {l / n, l % n};
 }
 
-inline int group(const pii& a, const pii& b) {
-    return (a.x + b.x + a.y + b.y) % 8 == 0;
+inline int samegroup(const pii& a, const pii& b) {
+    return ((a.x + a.y) % 4 == (b.x + b.y) % 4) and (a.x % 2 == b.x % 2);
 }
 
-inline void done() {
-    if (ans.empty()) {
-        cout << "None" << endl;
-        exit(0);
+inline pii getsrc(const pii& p) {
+    for (int x = 0; x < n; x++) {
+        for (int y = 0; y < n; y++) {
+            if (samegroup({x, y}, p))
+                return {x, y};
+        }
     }
-    if (ans.size() > 1) {
-        cout << "Multiple" << endl;
-        exit(0);
-    }
-    pii p = ans[0];
-    cout << p.x << ' ' << p.y << endl;
-    exit(0);
+    assert(0);
+    return {0, 0};
 }
 
-void judge(const pii& src) {
-    cout << src.x << ' ' << src.y << endl;
-    assert(G[src.x][src.y] != '.');
+void solve(pii src) {
+    src = getsrc(src);
 
-    const int n = G.size();
-    const int nn = n * n;
-    vector<int> adj[nn];
-    set<int> vx;
+    pii one;
+    bool flag = 0;
+    set<pii> bks;
+    vector<pii> adj[N][N];
+    for (int x = 0; x < n; x++) {
+        for (int y = 0; y < n; y++) {
+            if (g[x][y] == 'W') {
+                assert(x > 0 and x + 1 < n and y > 0 and y + 1 < n);
+                pii na, nb;
+                if (getsrc({x - 1, y - 1}) == src)
+                    na = {x - 1, y - 1}, nb = {x + 1, y + 1};
+                else
+                    na = {x - 1, y + 1}, nb = {x + 1, y - 1};
 
-    pii p = src;
-    while (p.x < n) {
-        for (; p.y < n; p.y += 4) {
-            if (G[p.x][p.y] != 'B') continue;
-            for (int i = 0; i < 4; i++) {
-                int dx = _d[i].x, dy = _d[i].y;
-                pii l(p.x + dx, p.y + dx);
-                pii ll(p.x + dx + dx, p.y + dy + dy);
+                if (g[na.x][na.y] == 'W') {
+                    // cout << "Bad White" << endl;
+                    return;
+                }
 
-                if (!good(l, n)) continue;
-                if (!good(ll, n)) continue;
-                if (G[l.x][l.y] != 'W') continue;
-                if (G[ll.x][ll.y] == 'W') return;
-                if (G[ll.x][ll.y] == 'B') return;
-
-                int u = dd(ll, n);
-                int v = dd(p, n);
-                adj[u].push_back(v);
-                adj[v].push_back(u);
-                vx.insert(u);
-                vx.insert(v);
+                vector<pii> cand = {na, nb};
+                for (const pii& ca : cand) {
+                    if (g[ca.x][ca.y] == 'W') {
+                        // cout << "Bad white" << endl;
+                        return;
+                    }
+                    if (g[ca.x][ca.y] != 'B') continue;
+                    if (flag and one != ca) {
+                        // cout << "Bad black" << endl;
+                        return;
+                    }
+                    flag = 1;
+                    one = ca;
+                }
+                adj[na.x][na.y].push_back(nb);
+                adj[nb.x][nb.y].push_back(na);
+                bks.insert(na);
+                bks.insert(nb);
             }
         }
-        p.x += 2;
-        p.y = (p.y + 2) % n;
     }
-    cout << vx.size() << endl;
-    if (vx.empty()) return;
 
-    int c = 0;
-    int o = *vx.begin();
-    vector<int> vis(nn);
-    vector<int> k = {o};
-    vis[o] = 1;
+    assert(flag);
+    set<pii> vis;
+    vector<pii> k = {one};
+    vis.insert(one);
     while (!k.empty()) {
-        int u = k.back();
+        auto u = k.back();
         k.pop_back();
-        c++;
-        for (int a : adj[u]) {
-            if (vis[a]) continue;
+        for (auto a : adj[u.x][u.y]) {
+            if (vis.count(a)) continue;
+            vis.insert(a);
             k.push_back(a);
         }
     }
 
-    if (c != vx.size()) return;
-    int odd;
-    for (auto& v : adj)
-        if (v.size() % 2) odd++;
-    if (odd > 2) return;
+    if (vis.size() != bks.size()) return;
 
-    if (odd == 0) {
-        p = src;
-        while (p.x < n) {
-            for (; p.y < n; p.y += 4) {
-                if (G[p.x][p.y] != 'B') continue;
-                ans.push_back(p);
-            }
-            p.x += 2;
-            p.y = (p.y + 2) % n;
-        }
-    } else {
-        p = src;
-        while (p.x < n) {
-            for (; p.y < n; p.y += 4) {
-                if (G[p.x][p.y] != 'B') continue;
-                if (adj[dd(p, n)].size()) ans.push_back(p);
-            }
-            p.x += 2;
-            p.y = (p.y + 2) % n;
-        }
+    vector<pii> odds;
+    for (auto& b : bks) {
+        if (adj[b.x][b.y].size() % 2) odds.push_back(b);
     }
-}
-
-pii awhite() {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            if (G[i][j] == 'W') return {i, j};
-        }
+    if (odds.size() > 2) {
+        // cout << "odds.size() > 2" << endl;
+        return;
     }
-    throw "";
-}
-
-void jwhite() {
-    const int n = G.size();
-
-    for (int i = 0; i < n; i++) {
-        if (G[i][0] == 'W') done();
-        if (G[i][n - 1] == 'W') done();
-        if (G[0][i] == 'W') done();
-        if (G[n - 1][i] == 'W') done();
+    if (odds.size() == 1) {
+        // cout << "odds.size() == 1" << endl;
+        return;
     }
-
-    pii w = awhite();
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            if (G[i][j] != 'W') continue;
-            int dx = abs(i - w.x), dy = abs(j - w.y);
-            if (dx % 2 or dy % 2) done();
+    if (odds.size() == 2) {
+        if (odds[0] == one or odds[1] == one) {
+            ans.push_back(one);
+        } else {
+            // cout << "odds.size() == 2 and BAD" << endl;
         }
+        return;
     }
-}
-
-vector<pii> coll(int src, int dx, int dy) {
-    const int n = G.size();
-    vector<pii> k = {src};
-    set<pii> vis = {src};
-    while (!k.empty()) {
-        auto u = k.back();
-        k.pop_back();
-
-        pii v = {u.x + d.x, d.y + d.y};
-        pii w = {u.x - d.x, d.y - d.y};
-        if (!vis.count(v) and good(v)) {
-            k.push_back(v);
-            vis.insert(v);
-        }
-        if (!vis.count(w) and good(w)) {
-            k.push_back(w);
-            vis.insert(w);
-        }
-    }
-    return vector<pii>(all(vis));
+    ans.push_back(one);
 }
 
 int main() {
     cin.tie(0), ios::sync_with_stdio(0);
-    int n;
     cin >> n;
+    string str;
+    for (int i = 0; i < n; i++) {
+        cin >> str;
+        for (int j = 0; j < n; j++) {
+            if (str[j] == 'W')
+                g[i][j] = 'W';
+            else if (str[j] == 'B')
+                g[i][j] = 'B';
+        }
+    }
 
     for (int i = 0; i < n; i++) {
-        string s;
-        cin >> s;
-        G.push_back(s);
-    }
-
-    jwhite();
-
-    if (n == 2) {
-        done();
-    }
-    if (n == 3) {
-        if (G[0][0] == '.') {
-            done();
+        if (g[i][0] == 'W' or g[i][n - 1] == 'W' or g[0][i] == 'W' or g[n - 1][i] == 'W') {
+            // cout << "Edge W" << endl;
+            cout << "None" << endl;
+            return 0;
         }
-        judge({0, 0});
-        judge({0, 2});
-        done();
     }
 
-    if (G[0][0] == '.') {
-        judge({0, 1});
-        judge({0, 3});
-        judge({1, 0});
-        judge({1, 2});
-    } else {
-        judge({0, 0});
-        judge({0, 2});
-        judge({1, 1});
-        judge({1, 3});
+    set<pii> vis;
+    for (int x = 0; x < n; x++) {
+        for (int y = 0; y < n; y++) {
+            if (g[x][y] != 'B') continue;
+            pii src = getsrc({x, y});
+            if (vis.count(src)) continue;
+            vis.insert(src);
+            // cout << "Solve " << x << ',' << y << endl;
+            solve(src);
+        }
     }
 
-    done();
-
+    if (ans.empty())
+        cout << "None" << endl;
+    else if (ans.size() == 2)
+        cout << "Multiple" << endl;
+    else {
+        assert(ans.size() == 1);
+        pii p = ans[0];
+        cout << (char)('a' + p.y) << n - p.x << endl;
+    }
     return 0;
 }

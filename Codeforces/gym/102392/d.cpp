@@ -10,83 +10,57 @@ typedef pair<int, int> pii;
 
 int main() {
     cin.tie(0), ios::sync_with_stdio(0);
-    cout.tie(0);
     string str;
     cin >> str;
-    int l = str.length();
-    vector<int> count(26);
-    for (char c : str) count[c - 'a']++;
+    int cnt[26] = {0};
+    for (char c : str) cnt[c - 'a']++;
+    int maxchar = max_element(cnt, cnt + 26) - cnt;
 
-    int dual = 0;
-    char maxchar;
-
-    for (int i = 0; i < 26; i++) {
-        char c = 'a' + i;
-        if (count[i] >= l / 2) {
-            dual++;
-            maxchar = c;
+    if (cnt[maxchar] <= str.size() / 2) {
+        cout << "YES\n";
+        for (int i = 0; i < 26; i++) {
+            for (int a = 0; a < cnt[i]; a++) cout << (char)('a' + i);
         }
-    }
-
-    if (dual == 2) {
-        sort(all(str));
-        cout << "YES\n"
-             << str << '\n';
+        cout << endl;
         return 0;
     }
 
-    if (dual == 0) {
-        cout << "YES\n"
-             << str << '\n';
+    if (cnt[maxchar] >= str.size() - 1) {
+        cout << "NO" << endl;
         return 0;
     }
 
-    int charCount = 0;
-    for (auto c : count) charCount += (c > 0);
-    char some = 0;
-    for (int i = 0; i < 26; i++) {
-        char c = 'a' + i;
-        if (c == maxchar) continue;
-        if (count[i] > 0) {
-            some = c;
-            break;
+    if (cnt[maxchar] == str.size() - 2) {
+        char a = 0, b = 0;
+        for (int i = 0; i < 26; i++) {
+            if (i == maxchar) continue;
+            if (!cnt[i]) continue;
+            if (a)
+                b = 'a' + i;
+            else
+                a = 'a' + i;
         }
-    }
-
-    int maxcharCount = count[maxchar - 'a'];
-    if (charCount <= 2) {
-        if (count[some - 'a'] > 2) {
-            puts("YES");
-            for (int i = 0; i < maxcharCount / 2; i++) putchar(maxchar);
-            putchar(some);
-            for (int i = maxcharCount / 2; i < maxcharCount; i++) putchar(maxchar);
-            for (int i = 1; i < count[some - 'a']; i++) putchar(some);
-            putchar('\n');
+        if (a and b) {
+            cout << "YES\n";
+            for (int i = 0; i < str.size() / 2 - 1; i++)
+                cout << (char)(maxchar + 'a');
+            cout << a;
+            for (int i = 0; i < str.size() / 2 - 1; i++)
+                cout << (char)(maxchar + 'a');
+            cout << b << endl;
+            return 0;
         } else {
-            puts("NO\n");
+            cout << "NO" << endl;
+            return 0;
         }
-
-        return 0;
     }
 
-    puts("YES");
-
-    assert(some != maxchar);
-    assert(some != 0);
-
-    //string ans;
-    for (int i = maxcharCount / 2; i > 0; i--) putchar(maxchar);
-    for (int i = count[some - 'a']; i > 0; i--) putchar(some);
-    for (int i = maxcharCount / 2; i < maxcharCount; i++) putchar(maxchar);
-
-    for (int i = 0; i < 26; i++) {
-        char c = 'a' + i;
-        if (c == maxchar or c == some) continue;
-        int cnt = count[i];
-        for (int j = 0; j < cnt; j++) putchar(c);  //ans.push_back(c);
-    }
-    //cout << ans << '\n';
-    putchar('\n');
-
+    string ans;
+    for (int i = 0; i < cnt[maxchar]; i++) ans.push_back('a' + maxchar);
+    for (int i = 0; i < 26; i++)
+        if (i != maxchar)
+            for (int j = 0; j < cnt[i]; j++) ans.push_back('a' + i);
+    swap(ans[ans.size() / 2 - 1], ans[cnt[maxchar]]);
+    cout << "YES\n" << ans << endl;
     return 0;
 }
