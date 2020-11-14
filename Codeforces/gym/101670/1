@@ -1,0 +1,7 @@
+k.cpp: In function ‘pii solve(int, const vv&, const vv&)’:
+k.cpp:45:19: error: expected unqualified-id before ‘[’ token
+     return {group.[0][0], group.back()[0]};
+                   ^
+k.cpp:45:42: error: could not convert ‘{<expression error>, (& group.std::vector<std::vector<int> >::back())->std::vector<int>::operator[](0)}’ from ‘<brace-enclosed initializer list>’ to ‘pii {aka std::pair<int, int>}’
+     return {group.[0][0], group.back()[0]};
+                                          ^
