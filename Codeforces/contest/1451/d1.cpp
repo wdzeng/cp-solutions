@@ -29,7 +29,8 @@ int main() {
         ll x = floor(sqrt(x2));
         ll y2 = (d * d - x * x * k * k) / k / k;
         ll y = floor(sqrt(y2));
-        if (abs(x - y) % 2 == 1) {
+        assert(y == x || y == x + 1);
+        if (y == x + 1) {
             cout << "Ashish" << endl;
         } else {
             cout << "Utkarsh" << endl;

@@ -27,7 +27,7 @@ int main() {
         d /= k;
         ll x = floor(1e-8 + sqrt(d * d / 2));
         ll y = floor(1e-8 + sqrt(d * d - x * x));
-        cout << (abs(x - y) % 2 == 0 ? "Utkarsh" : "Ashish") << endl;
+        cout << (y == x ? "Utkarsh" : "Ashish") << endl;
     }
     return 0;
 }
